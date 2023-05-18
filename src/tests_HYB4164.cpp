@@ -46,7 +46,9 @@ bool runTest()
     measureWriteBitTime();
     measureReadByteTime();
     measureReadBitTime();
-    countBadBits();
+    if(failures > 0) { 
+        countBadBits();
+    }
 
     Serial.println(F("-------------  END  -------------"));
     Serial.println("");
