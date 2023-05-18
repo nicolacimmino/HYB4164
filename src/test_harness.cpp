@@ -54,6 +54,18 @@ void reportResult(bool result, const char *message)
     }
 }
 
+void reportNumericResult(uint16_t result, const char *unit, const char *message)
+{
+    sprintf(printBuffer, "%-30s %d%s\r\n", message, result, unit);
+    Serial.print(printBuffer);
+
+    asserts++;
+    if (!result)
+    {
+        failures++;
+    }
+}
+
 bool isButtonPressed()
 {
     return analogRead(PIN_BUTTON) < 5;

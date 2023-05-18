@@ -54,5 +54,6 @@ void setLine(byte line, byte level);
 byte readLine(byte line);
 void expect(byte line, byte value, const char *message);
 void reportResult(bool result, const char *message);
+void reportNumericResult(uint16_t result, const char *unit, const char *message);
 
 #endif

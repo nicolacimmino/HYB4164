@@ -32,10 +32,14 @@ void powerUpHYB4164();
 void writeAddressBus(uint8_t address);
 void writeMemory(uint16_t address, bool value);
 bool readMemory(uint16_t address);
+void writeByte(uint16_t address, uint8_t value);
+uint8_t readByte(uint16_t address);
 
 void testWritePattern();
 void testWriteZeros();
 void testWriteOnes();
+void measureWriteBitTime();
+void measureWriteByteTime();
 
 void refreshRow();
 

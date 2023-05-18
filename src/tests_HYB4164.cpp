@@ -21,20 +21,14 @@ byte dut_pins[] = {
 
 bool runTest()
 {
-    Serial.println(F("------------- START -------------"));
-
     setupTestHarness();
     powerUpHYB4164();
 
-    Serial.println(F("Power up                       OK"));
+    Serial.println(F("--------- TESTS - START ---------"));
 
     testWritePattern();
     testWriteZeros();
     testWriteOnes();
-
-    releaseHYB4164();
-
-    Serial.println(F("Release DUT                    OK"));
 
     if (failures > 0)
     {
@@ -44,6 +38,16 @@ bool runTest()
 
     Serial.println(F("-------------  END  -------------"));
     Serial.println("");
+
+    Serial.println(F("-------- MEASURE - START --------"));
+
+    measureWriteByteTime();
+    measureWriteBitTime();
+
+    Serial.println(F("-------------  END  -------------"));
+    Serial.println("");
+
+    releaseHYB4164();
 
     return (failures == 0);
 }
@@ -86,7 +90,7 @@ void powerUpHYB4164()
 
     for (uint16_t ix = 0; ix < 256; ix++)
     {
-        refreshRow();
+        writeByte(ix, ix);
     }
 }
 
@@ -121,10 +125,10 @@ void writeMemory(uint16_t address, bool value)
 
 bool readMemory(uint16_t address)
 {
-    writeAddressBus(address & 0xFF);
+    writeAddressBus((address >> 8) & 0xFF);
     digitalWrite(PIN_RAS_N, LOW);
 
-    writeAddressBus((address >> 8) & 0xFF);
+    writeAddressBus(address & 0xFF);
     digitalWrite(PIN_CAS_N, LOW);
 
     bool value = (digitalRead(PIN_DO) == HIGH);
@@ -137,12 +141,23 @@ bool readMemory(uint16_t address)
 
 void writeByte(uint16_t address, uint8_t value)
 {
+    writeAddressBus((address >> 5) & 0xFF);
+    digitalWrite(PIN_RAS_N, LOW);
+    
     for (uint8_t ix = 0; ix < 8; ix++)
     {
-        writeMemory((address << 3) + ix, (value >> ix) & 0x1);
+        digitalWrite(PIN_WE_N, LOW);
+
+        digitalWrite(PIN_DI, (value >> ix) & 0x1);
+
+        writeAddressBus((address << 3) | ix);
+        digitalWrite(PIN_CAS_N, LOW);
+
+        digitalWrite(PIN_WE_N, HIGH);
+        digitalWrite(PIN_CAS_N, HIGH);
     }
 
-    refreshRow();
+    digitalWrite(PIN_RAS_N, HIGH);
 }
 
 uint8_t readByte(uint16_t address)
@@ -151,28 +166,26 @@ uint8_t readByte(uint16_t address)
 
     for (uint8_t ix = 0; ix < 8; ix++)
     {
-        value = value | ((readMemory((address << 3) + ix) ? 1 : 0) << ix);
+        value = value | ((readMemory((address << 3) | ix) ? 1 : 0) << ix);
     }
-
-    refreshRow();
 
     return value;
 }
 
 void testWritePattern()
 {
-    for (uint16_t ix = 0; ix < 256; ix++)
+    for (uint16_t ix = 0; ix < 8192; ix++)
     {
-        writeByte(ix, ix);
+        writeByte(ix, ix & 0xFF);
     }
 
     bool match = true;
-    for (uint16_t ix = 0; ix < 256; ix++)
+    for (uint16_t ix = 0; ix < 8192; ix++)
     {
-        if (readByte(ix) != ix)
-        {
+        if (readByte(ix) != (ix & 0XFF))
+        {            
             match = false;
-        } 
+        }
     }
 
     reportResult(match, "Write Pattern");
@@ -180,19 +193,18 @@ void testWritePattern()
 
 void testWriteZeros()
 {
-    for (uint16_t ix = 0; ix < 256; ix++)
+    for (uint16_t ix = 0; ix < 8192; ix++)
     {
         writeByte(ix, 0);
     }
 
     bool match = true;
-    for (uint16_t ix = 0; ix < 256; ix++)
+    for (uint16_t ix = 0; ix < 8192; ix++)
     {
         if (readByte(ix) != 0)
         {
             match = false;
         }
-        refreshRow();
     }
 
     reportResult(match, "Write Zeros");
@@ -200,32 +212,43 @@ void testWriteZeros()
 
 void testWriteOnes()
 {
-    for (uint16_t ix = 0; ix < 256; ix++)
+    for (uint16_t ix = 0; ix < 8192; ix++)
     {
         writeByte(ix, 1);
     }
 
     bool match = true;
-    for (uint16_t ix = 0; ix < 256; ix++)
+    for (uint16_t ix = 0; ix < 8192; ix++)
     {
         if (readByte(ix) != 1)
         {
             match = false;
         }
-        refreshRow();
     }
 
     reportResult(match, "Write Ones");
 }
 
-
-
-uint8_t refreshRowAddress = 0;
-
-void refreshRow()
+void measureWriteByteTime()
 {
-    writeAddressBus(refreshRowAddress);
-    digitalWrite(PIN_RAS_N, LOW);
-    digitalWrite(PIN_RAS_N, HIGH);
-    refreshRowAddress++;
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        writeByte(ix, 1);
+    }
+    unsigned long writeTimeuS = (1000 * (millis() - startTime)) / 1024;
+
+    reportNumericResult(writeTimeuS, "uS", "Write Byte Time");
+}
+
+void measureWriteBitTime()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        writeMemory(ix, 1);
+    }
+    unsigned long writeTimeuS = (1000 * (millis() - startTime)) / 1024;
+
+    reportNumericResult(writeTimeuS, "uS", "Write Bit Time");
 }
