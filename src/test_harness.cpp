@@ -54,9 +54,9 @@ void reportResult(bool result, const char *message)
     }
 }
 
-void reportNumericResult(uint16_t result, const char *unit, const char *message)
+void reportNumericResult(uint32_t result, const char *unit, const char *message)
 {
-    sprintf(printBuffer, "%-30s %d%s\r\n", message, result, unit);
+    sprintf(printBuffer, "%-30s %lu%s\r\n", message, result, unit);
     Serial.print(printBuffer);
 
     asserts++;

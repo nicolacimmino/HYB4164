@@ -43,9 +43,10 @@ bool runTest()
     Serial.println(F("-------- MEASURE - START --------"));
 
     measureWriteByteTime();
-    measureWriteBitTime();    
+    measureWriteBitTime();
     measureReadByteTime();
     measureReadBitTime();
+    countBadBits();
 
     Serial.println(F("-------------  END  -------------"));
     Serial.println("");
@@ -89,7 +90,9 @@ void powerUpHYB4164()
     digitalWrite(PIN_RAS_N, HIGH);
     digitalWrite(PIN_CAS_N, HIGH);
 
-    for (uint16_t ix = 0; ix < 8; ix++)
+    delay(100);
+
+    for (uint16_t ix = 0; ix < 256; ix++)
     {
         writeByte(ix, ix);
     }    
@@ -217,4 +220,27 @@ void measureReadByteTime()
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
     reportNumericResult(timeuS, "uS", "Read Byte Time");
+}
+
+void countBadBits()
+{
+    uint32_t badCount = 0;
+
+    for (uint32_t ix = 0; ix < 65535; ix++)
+    {
+        writeBit(ix, true);
+        if (readBit(ix) != true)
+        {
+            badCount++;
+            continue;
+        }
+
+        writeBit(ix, false);
+        if (readBit(ix) != false)
+        {
+            badCount++;
+        }
+    }
+
+    reportNumericResult(badCount, "", "Bad Bits");
 }

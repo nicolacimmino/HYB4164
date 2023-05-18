@@ -21,5 +21,6 @@ void measureWriteBitTime();
 void measureWriteByteTime();
 void measureReadBitTime();
 void measureReadByteTime();
+void countBadBits();
 
 #endif
