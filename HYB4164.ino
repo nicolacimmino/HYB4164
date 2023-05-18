@@ -1,4 +1,4 @@
-// Tester for MC14500 ICUs.
+// Tester for HYB4164 DRAM Chips.
 //  Copyright (C) 2023 Nicola Cimmino
 //
 //    This program is free software: you can redistribute it and/or modify

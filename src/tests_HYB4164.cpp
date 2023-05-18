@@ -26,7 +26,8 @@ bool runTest()
 
     Serial.println(F("--------- TESTS - START ---------"));
 
-    testWritePattern();
+    testWriteBytePattern();
+    testWriteBitPattern();
     testWriteZeros();
     testWriteOnes();
 
@@ -42,7 +43,9 @@ bool runTest()
     Serial.println(F("-------- MEASURE - START --------"));
 
     measureWriteByteTime();
-    measureWriteBitTime();
+    measureWriteBitTime();    
+    measureReadByteTime();
+    measureReadBitTime();
 
     Serial.println(F("-------------  END  -------------"));
     Serial.println("");
@@ -86,93 +89,13 @@ void powerUpHYB4164()
     digitalWrite(PIN_RAS_N, HIGH);
     digitalWrite(PIN_CAS_N, HIGH);
 
-    delay(100);
-
-    for (uint16_t ix = 0; ix < 256; ix++)
+    for (uint16_t ix = 0; ix < 8; ix++)
     {
         writeByte(ix, ix);
-    }
+    }    
 }
 
-void writeAddressBus(uint8_t address)
-{
-    digitalWrite(PIN_A0, address & 0x1);
-    digitalWrite(PIN_A1, (address >> 1) & 0x1);
-    digitalWrite(PIN_A2, (address >> 2) & 0x1);
-    digitalWrite(PIN_A3, (address >> 3) & 0x1);
-    digitalWrite(PIN_A4, (address >> 4) & 0x1);
-    digitalWrite(PIN_A5, (address >> 5) & 0x1);
-    digitalWrite(PIN_A6, (address >> 6) & 0x1);
-    digitalWrite(PIN_A7, (address >> 7) & 0x1);
-}
-
-void writeMemory(uint16_t address, bool value)
-{
-    writeAddressBus(address & 0xFF);
-    digitalWrite(PIN_RAS_N, LOW);
-
-    digitalWrite(PIN_WE_N, LOW);
-
-    digitalWrite(PIN_DI, value);
-
-    writeAddressBus((address >> 8) & 0xFF);
-    digitalWrite(PIN_CAS_N, LOW);
-
-    digitalWrite(PIN_WE_N, HIGH);
-    digitalWrite(PIN_CAS_N, HIGH);
-    digitalWrite(PIN_RAS_N, HIGH);
-}
-
-bool readMemory(uint16_t address)
-{
-    writeAddressBus((address >> 8) & 0xFF);
-    digitalWrite(PIN_RAS_N, LOW);
-
-    writeAddressBus(address & 0xFF);
-    digitalWrite(PIN_CAS_N, LOW);
-
-    bool value = (digitalRead(PIN_DO) == HIGH);
-
-    digitalWrite(PIN_CAS_N, HIGH);
-    digitalWrite(PIN_RAS_N, HIGH);
-
-    return value;
-}
-
-void writeByte(uint16_t address, uint8_t value)
-{
-    writeAddressBus((address >> 5) & 0xFF);
-    digitalWrite(PIN_RAS_N, LOW);
-    
-    for (uint8_t ix = 0; ix < 8; ix++)
-    {
-        digitalWrite(PIN_WE_N, LOW);
-
-        digitalWrite(PIN_DI, (value >> ix) & 0x1);
-
-        writeAddressBus((address << 3) | ix);
-        digitalWrite(PIN_CAS_N, LOW);
-
-        digitalWrite(PIN_WE_N, HIGH);
-        digitalWrite(PIN_CAS_N, HIGH);
-    }
-
-    digitalWrite(PIN_RAS_N, HIGH);
-}
-
-uint8_t readByte(uint16_t address)
-{
-    uint8_t value = 0;
-
-    for (uint8_t ix = 0; ix < 8; ix++)
-    {
-        value = value | ((readMemory((address << 3) | ix) ? 1 : 0) << ix);
-    }
-
-    return value;
-}
-
-void testWritePattern()
+void testWriteBytePattern()
 {
     for (uint16_t ix = 0; ix < 8192; ix++)
     {
@@ -188,20 +111,20 @@ void testWritePattern()
         }
     }
 
-    reportResult(match, "Write Pattern");
+    reportResult(match, "Write Byte Pattern");
 }
 
 void testWriteZeros()
 {
-    for (uint16_t ix = 0; ix < 8192; ix++)
+    for (uint32_t ix = 0; ix < 65535; ix++)
     {
-        writeByte(ix, 0);
+        writeBit(ix, false);
     }
 
     bool match = true;
-    for (uint16_t ix = 0; ix < 8192; ix++)
+    for (uint32_t ix = 0; ix < 65535; ix++)
     {
-        if (readByte(ix) != 0)
+        if (readBit(ix) != false)
         {
             match = false;
         }
@@ -212,21 +135,40 @@ void testWriteZeros()
 
 void testWriteOnes()
 {
-    for (uint16_t ix = 0; ix < 8192; ix++)
+    for (uint32_t ix = 0; ix < 65535; ix++)
     {
-        writeByte(ix, 1);
+        writeBit(ix, true);
     }
 
     bool match = true;
-    for (uint16_t ix = 0; ix < 8192; ix++)
+    for (uint32_t ix = 0; ix < 65535; ix++)
     {
-        if (readByte(ix) != 1)
+        if (readBit(ix) != true)
         {
             match = false;
         }
     }
 
     reportResult(match, "Write Ones");
+}
+
+void testWriteBitPattern()
+{
+    for (uint32_t ix = 0; ix < 65535; ix++)
+    {
+        writeBit(ix, ix & 0x1);
+    }
+
+    bool match = true;
+    for (uint32_t ix = 0; ix < 65535; ix++)
+    {
+        if (readBit(ix) != (ix & 0x1 == 0x1))
+        {
+            match = false;
+        }
+    }
+
+    reportResult(match, "Write Bit Pattern");
 }
 
 void measureWriteByteTime()
@@ -236,9 +178,9 @@ void measureWriteByteTime()
     {
         writeByte(ix, 1);
     }
-    unsigned long writeTimeuS = (1000 * (millis() - startTime)) / 1024;
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(writeTimeuS, "uS", "Write Byte Time");
+    reportNumericResult(timeuS, "uS", "Write Byte Time");
 }
 
 void measureWriteBitTime()
@@ -246,9 +188,33 @@ void measureWriteBitTime()
     unsigned long startTime = millis();
     for (uint16_t ix = 0; ix < 1024; ix++)
     {
-        writeMemory(ix, 1);
+        writeBit(ix, 1);
     }
-    unsigned long writeTimeuS = (1000 * (millis() - startTime)) / 1024;
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(writeTimeuS, "uS", "Write Bit Time");
+    reportNumericResult(timeuS, "uS", "Write Bit Time");
+}
+
+void measureReadBitTime()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        readBit(ix);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
+
+    reportNumericResult(timeuS, "uS", "Read Bit Time");
+}
+
+void measureReadByteTime()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        readByte(ix);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
+
+    reportNumericResult(timeuS, "uS", "Read Byte Time");
 }

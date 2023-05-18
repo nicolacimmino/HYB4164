@@ -1,0 +1,27 @@
+baseline. paged read/write but all with digitalWrite/Read
+
+-------- MEASURE - START --------
+Write Byte Time                650uS
+Write Bit Time                 130uS
+Read Byte Time                 560uS
+Read Bit Time                  119uS
+-------------  END  -------------
+
+only setAddress with digitalWriteFast
+
+-------- MEASURE - START --------
+Write Byte Time                209uS
+Write Bit Time                 36uS
+Read Byte Time                 117uS
+Read Bit Time                  24uS
+-------------  END  -------------
+
+Everything with read/writeFast
+
+-------- MEASURE - START --------
+Write Byte Time                56uS
+Write Bit Time                 9uS
+Read Byte Time                 59uS
+Read Bit Time                  9uS
+-------------  END  -------------
+
