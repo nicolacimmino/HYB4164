@@ -1,6 +1,5 @@
 #include "test_harness.h"
 
-char printBuffer[PRINT_BUFFER_SIZE];
 uint8_t failures = 0;
 uint8_t asserts = 0;
 

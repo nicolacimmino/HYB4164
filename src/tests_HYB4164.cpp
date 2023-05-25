@@ -24,7 +24,7 @@ bool runTest()
     setupTestHarness();
     powerUpHYB4164();
 
-    Serial.println(F("--------- TESTS - START ---------"));
+    Serial.println(F("\r\n--------- TESTS - START ---------"));
 
     testWriteBytePattern();
     testWriteBitPattern();

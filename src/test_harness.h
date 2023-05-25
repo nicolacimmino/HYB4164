@@ -42,8 +42,6 @@
 #define DUT14_PIN_13 A2
 #define DUT14_PIN_14 A3
 
-#define PRINT_BUFFER_SIZE 80
-
 extern char printBuffer[PRINT_BUFFER_SIZE];
 extern uint8_t failures;
 extern uint8_t asserts;

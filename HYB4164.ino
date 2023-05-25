@@ -17,38 +17,15 @@
 //
 
 #include "src/test_harness.h"
+#include "src/monitor.h"
 
 void setup()
 {
-  setupTestHarness();
-
   Serial.begin(9600);
+
+  setupTestHarness();
+  powerUpHYB4164();
+  enterMonitor();
 }
 
-void loop()
-{
-  digitalWrite(PIN_LED_GREEN, LOW);
-
-  while (!isButtonPressed())
-  {
-    digitalWrite(PIN_LED_RED, (millis() % 1000 < 200) ? HIGH : LOW);
-  }
-
-  digitalWrite(PIN_LED_RED, LOW);
-
-  bool result = runTest();
-
-  digitalWrite(PIN_LED_GREEN, result);
-  digitalWrite(PIN_LED_RED, !result);
-
-  // Hang here in case of failure so it's not missed
-  // and we can leave the system unattended in ageing
-  // mode while still catching random failures.
-  if (!result)
-  {
-    while (true)
-      ;
-  }
-
-  delay(2000);
-}
+void loop();
