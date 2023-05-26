@@ -17,7 +17,7 @@ void enterMonitor()
 
   while (true)
   {
-    if (isButtonPressed())
+    if (failures == 0 && isButtonPressed())
     {
       test(0);
 
@@ -129,9 +129,6 @@ uint8_t processCommand()
 
 void test(int loop)
 {
-  digitalWrite(PIN_LED_GREEN, LOW);
-  digitalWrite(PIN_LED_RED, LOW);
-
   while (true)
   {
     bool result = runTest();
