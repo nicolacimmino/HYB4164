@@ -2,6 +2,8 @@
 
 bool runTest()
 {
+    setupTestHarness();
+    
     Serial.println(F("\r\n--------- TESTS - START ---------"));
 
     testWriteZeros();
