@@ -6,11 +6,8 @@
 #include "test_harness.h"
 #include "HYB4164_driver.h"
 
-#define DUT_PINS_COUNT 16
-
 bool runTest();
 
-void releaseHYB4164();
 void powerUpHYB4164();
 
 void testWriteBytePattern();

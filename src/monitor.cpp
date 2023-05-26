@@ -20,7 +20,11 @@ void enterMonitor()
     if (isButtonPressed())
     {
       test(0);
-      Serial.print(F("\r\n" MONITOR_PROMPT));
+
+      if (!isButtonPressed())
+      {
+        Serial.print(F("\r\n" MONITOR_PROMPT));
+      }
     }
 
     while (Serial.available())
@@ -62,7 +66,6 @@ void enterMonitor()
  * Returns:
  *  RES_OK              Command processed successfully.
  *  RES_ERR             Error while processing command.
- *  RES_LEAVE_MONITOR   User wants to leave the monitor.
  */
 
 uint8_t processCommand()
@@ -119,6 +122,11 @@ uint8_t processCommand()
 /*
  **********************************************************************/
 
+/**********************************************************************
+ * Run Tests.
+ * 
+ */
+
 void test(int loop)
 {
   digitalWrite(PIN_LED_GREEN, LOW);
@@ -131,22 +139,21 @@ void test(int loop)
     digitalWrite(PIN_LED_GREEN, result);
     digitalWrite(PIN_LED_RED, !result);
 
+    delay(2000);
+
     if (!result || loop == 0)
     {
       return;
     }
-
-    delay(2000);
   }
 }
 
+/*
+ **********************************************************************/
+
 /**********************************************************************
- * Write the program memory.
+ * Write to the memory.
  * 
- * NOTE: this writes the Arduino EEPROM section that acts as a hardcopy
- *  of the program and not directly to the PLC14500 RAM. The changes
- *  will not be reflected in the PLC14500 RAM until the board is 
- *  bootstrapped.
  */
 
 void writeMemory(int address)
@@ -213,7 +220,7 @@ void writeMemory(int address)
  **********************************************************************/
 
 /**********************************************************************
- * Dump program memory MON_DUMP_PER_LINE bytes per line.
+ * Dump memory, MON_DUMP_PER_LINE bytes per line.
  * 
  */
 

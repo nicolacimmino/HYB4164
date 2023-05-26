@@ -1,29 +1,7 @@
 #include "tests_HYB4164.h"
 
-byte dut_pins[] = {
-    PIN_NC1,
-    PIN_DI,
-    PIN_WE_N,
-    PIN_RAS_N,
-    PIN_A0,
-    PIN_A2,
-    PIN_A1,
-    PIN_VCC,
-    PIN_A7,
-    PIN_A5,
-    PIN_A4,
-    PIN_A3,
-    PIN_A6,
-    PIN_DO,
-    PIN_CAS_N,
-    PIN_GND,
-};
-
 bool runTest()
-{
-    setupTestHarness();
-    powerUpHYB4164();
-
+{    
     Serial.println(F("\r\n--------- TESTS - START ---------"));
 
     testWriteBytePattern();
@@ -53,17 +31,7 @@ bool runTest()
     Serial.println(F("-------------  END  -------------"));
     Serial.println("");
 
-    releaseHYB4164();
-
     return (failures == 0);
-}
-
-void releaseHYB4164()
-{
-    for (uint8_t ix = 0; ix < DUT_PINS_COUNT; ix++)
-    {
-        pinMode(dut_pins[ix], INPUT);
-    }
 }
 
 void powerUpHYB4164()
