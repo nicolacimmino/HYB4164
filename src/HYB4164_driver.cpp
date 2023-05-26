@@ -46,6 +46,34 @@ bool readBit(uint16_t address)
     return value;
 }
 
+void writeWord(uint8_t wordSize, uint16_t address, uint64_t value)
+{
+    uint8_t bits=0;
+    uint8_t tmpWordSize=wordSize;
+    while (tmpWordSize = tmpWordSize >> 1)
+    {
+        bits++;
+    }
+
+    setAddress((address >> (8-bits)) & 0xFF);
+    digitalWriteFast(PIN_RAS_N, LOW);
+
+    for (uint8_t ix = 0; ix < wordSize; ix++)
+    {
+        digitalWriteFast(PIN_WE_N, LOW);
+
+        digitalWriteFast(PIN_DI, (value >> ix) & 0x1);
+
+        setAddress((address << bits) | ix);
+        digitalWriteFast(PIN_CAS_N, LOW);
+
+        digitalWriteFast(PIN_WE_N, HIGH);
+        digitalWriteFast(PIN_CAS_N, HIGH);
+    }
+
+    digitalWriteFast(PIN_RAS_N, HIGH);
+}
+
 void writeByte(uint16_t address, uint8_t value)
 {
     setAddress((address >> 5) & 0xFF);
@@ -76,6 +104,35 @@ uint8_t readByte(uint16_t address)
     for (uint8_t ix = 0; ix < 8; ix++)
     {
         setAddress((address << 3) | ix);
+        digitalWriteFast(PIN_CAS_N, LOW);
+
+        delayMicroseconds(2);
+        value = value | ((digitalReadFast(PIN_DO) ? 1 : 0) << ix);
+
+        digitalWriteFast(PIN_CAS_N, HIGH);
+    }
+
+    digitalWriteFast(PIN_RAS_N, HIGH);
+
+    return value;
+}
+
+uint64_t readWord(uint8_t wordSize, uint16_t address)
+{
+    uint8_t bits=0;
+    uint8_t tmpWordSize=wordSize;
+    while (tmpWordSize = tmpWordSize >> 1)
+    {
+        bits++;
+    }
+
+    setAddress((address >> (8 - bits)) & 0xFF);
+    digitalWriteFast(PIN_RAS_N, LOW);
+
+    uint64_t value = 0;
+    for (uint8_t ix = 0; ix < wordSize; ix++)
+    {
+        setAddress((address << bits) | ix);
         digitalWriteFast(PIN_CAS_N, LOW);
 
         delayMicroseconds(2);

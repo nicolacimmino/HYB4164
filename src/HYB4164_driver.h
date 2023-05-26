@@ -28,4 +28,7 @@ bool readBit(uint16_t address);
 void writeByte(uint16_t address, uint8_t value);
 uint8_t readByte(uint16_t address);
 
+void writeWord(uint8_t wordSize, uint16_t address, uint64_t value);
+uint64_t readWord(uint8_t wordSize, uint16_t address);
+
 #endif

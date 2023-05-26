@@ -10,6 +10,10 @@ bool runTest();
 
 void powerUpHYB4164();
 
+void testWriteWord8Pattern();
+void testWriteWord16Pattern();
+void testWriteWord32Pattern();
+void testWriteWord64Pattern();
 void testWriteBytePattern();
 void testWriteBitPattern();
 void testWriteZeros();
@@ -18,6 +22,14 @@ void measureWriteBitTime();
 void measureWriteByteTime();
 void measureReadBitTime();
 void measureReadByteTime();
+void measureReadWord8Time();
+void measureReadWord16Time();
+void measureReadWord32Time();
+void measureReadWord64Time();
+void measureWriteWord8Time();
+void measureWriteWord16Time();
+void measureWriteWord32Time();
+void measureWriteWord64Time();
 void countBadBits();
 
 #endif

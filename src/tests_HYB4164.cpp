@@ -1,13 +1,17 @@
 #include "tests_HYB4164.h"
 
 bool runTest()
-{    
+{
     Serial.println(F("\r\n--------- TESTS - START ---------"));
 
-    testWriteBytePattern();
-    testWriteBitPattern();
     testWriteZeros();
     testWriteOnes();
+    testWriteBitPattern();
+    testWriteBytePattern();
+    testWriteWord8Pattern();
+    testWriteWord16Pattern();
+    testWriteWord32Pattern();
+    testWriteWord64Pattern();
 
     if (failures > 0)
     {
@@ -20,11 +24,22 @@ bool runTest()
 
     Serial.println(F("-------- MEASURE - START --------"));
 
-    measureWriteByteTime();
     measureWriteBitTime();
-    measureReadByteTime();
+    measureWriteByteTime();
+    measureWriteWord8Time();
+    measureWriteWord16Time();
+    measureWriteWord32Time();
+    measureWriteWord64Time();
+
     measureReadBitTime();
-    if(failures > 0) { 
+    measureReadByteTime();
+    measureReadWord8Time();
+    measureReadWord16Time();
+    measureReadWord32Time();
+    measureReadWord64Time();
+
+    if (failures > 0)
+    {
         countBadBits();
     }
 
@@ -65,7 +80,7 @@ void powerUpHYB4164()
     for (uint16_t ix = 0; ix < 256; ix++)
     {
         writeByte(ix, ix);
-    }    
+    }
 }
 
 void testWriteBytePattern()
@@ -79,12 +94,88 @@ void testWriteBytePattern()
     for (uint16_t ix = 0; ix < 8192; ix++)
     {
         if (readByte(ix) != (ix & 0XFF))
-        {            
+        {
             match = false;
         }
     }
 
     reportResult(match, "Write Byte Pattern");
+}
+
+void testWriteWord8Pattern()
+{
+    for (uint16_t ix = 0; ix < 8192; ix++)
+    {
+        writeWord(8, ix, ix & 0xFF);
+    }
+
+    bool match = true;
+    for (uint16_t ix = 0; ix < 8192; ix++)
+    {
+        if (readWord(8, ix) != (ix & 0XFF))
+        {
+            match = false;
+        }
+    }
+
+    reportResult(match, "Write Word8 Pattern");
+}
+
+void testWriteWord16Pattern()
+{
+    for (uint16_t ix = 0; ix < 4096; ix++)
+    {
+        writeWord(16, ix, ix & 0xFFFF);
+    }
+
+    bool match = true;
+    for (uint16_t ix = 0; ix < 4096; ix++)
+    {
+        if (readWord(16, ix) != (ix & 0XFFFF))
+        {
+            match = false;
+        }
+    }
+
+    reportResult(match, "Write Word16 Pattern");
+}
+
+void testWriteWord32Pattern()
+{
+    for (uint16_t ix = 0; ix < 2048; ix++)
+    {
+        writeWord(16, ix, ix);
+    }
+
+    bool match = true;
+    for (uint16_t ix = 0; ix < 2048; ix++)
+    {
+        if (readWord(16, ix) != ix)
+        {
+            match = false;
+        }
+    }
+
+    reportResult(match, "Write Word32 Pattern");
+}
+
+void testWriteWord64Pattern()
+{
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        writeWord(64, ix, ix);
+    }
+
+    bool match = true;
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        if (readWord(64, ix) != ix)
+        {
+            match = false;
+        }
+    }
+
+    reportResult(match, "Write Word64 Pattern");
 }
 
 void testWriteZeros()
@@ -153,7 +244,55 @@ void measureWriteByteTime()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Write Byte Time");
+    reportNumericResult(timeuS, "uS", "Write Byte");
+}
+
+void measureWriteWord8Time()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        writeWord(8, ix, 1);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
+
+    reportNumericResult(timeuS, "uS", "Write Word8");
+}
+
+void measureWriteWord16Time()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 512; ix++)
+    {
+        writeWord(16, ix, 1);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 512;
+
+    reportNumericResult(timeuS, "uS", "Write Word16");
+}
+
+void measureWriteWord32Time()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        writeWord(32, ix, 1);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportNumericResult(timeuS, "uS", "Write Word32");
+}
+
+void measureWriteWord64Time()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        writeWord(64, ix, 1);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportNumericResult(timeuS, "uS", "Write Word64");
 }
 
 void measureWriteBitTime()
@@ -165,7 +304,7 @@ void measureWriteBitTime()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Write Bit Time");
+    reportNumericResult(timeuS, "uS", "Write Bit");
 }
 
 void measureReadBitTime()
@@ -177,7 +316,7 @@ void measureReadBitTime()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Read Bit Time");
+    reportNumericResult(timeuS, "uS", "Read Bit");
 }
 
 void measureReadByteTime()
@@ -189,7 +328,55 @@ void measureReadByteTime()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Read Byte Time");
+    reportNumericResult(timeuS, "uS", "Read Byte");
+}
+
+void measureReadWord8Time()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        readWord(8, ix);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
+
+    reportNumericResult(timeuS, "uS", "Read Word8");
+}
+
+void measureReadWord16Time()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        readWord(16, ix);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
+
+    reportNumericResult(timeuS, "uS", "Read Word16");
+}
+
+void measureReadWord32Time()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        readWord(32, ix);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportNumericResult(timeuS, "uS", "Read Word32");
+}
+
+void measureReadWord64Time()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        readWord(64, ix);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportNumericResult(timeuS, "uS", "Read Word64");
 }
 
 void countBadBits()
