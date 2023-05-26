@@ -48,14 +48,14 @@ bool readBit(uint16_t address)
 
 void writeWord(uint8_t wordSize, uint16_t address, uint64_t value)
 {
-    uint8_t bits=0;
-    uint8_t tmpWordSize=wordSize;
+    uint8_t bits = 0;
+    uint8_t tmpWordSize = wordSize;
     while (tmpWordSize = tmpWordSize >> 1)
     {
         bits++;
     }
 
-    setAddress((address >> (8-bits)) & 0xFF);
+    setAddress((address >> (8 - bits)) & 0xFF);
     digitalWriteFast(PIN_RAS_N, LOW);
 
     for (uint8_t ix = 0; ix < wordSize; ix++)
@@ -65,6 +65,27 @@ void writeWord(uint8_t wordSize, uint16_t address, uint64_t value)
         digitalWriteFast(PIN_DI, (value >> ix) & 0x1);
 
         setAddress((address << bits) | ix);
+        digitalWriteFast(PIN_CAS_N, LOW);
+
+        digitalWriteFast(PIN_WE_N, HIGH);
+        digitalWriteFast(PIN_CAS_N, HIGH);
+    }
+
+    digitalWriteFast(PIN_RAS_N, HIGH);
+}
+
+void writeNibble(uint16_t address, uint8_t value)
+{
+    setAddress((address >> 6) & 0xFF);
+    digitalWriteFast(PIN_RAS_N, LOW);
+
+    for (uint8_t ix = 0; ix < 4; ix++)
+    {
+        digitalWriteFast(PIN_WE_N, LOW);
+
+        digitalWriteFast(PIN_DI, (value >> ix) & 0x1);
+
+        setAddress((address << 2) | ix);
         digitalWriteFast(PIN_CAS_N, LOW);
 
         digitalWriteFast(PIN_WE_N, HIGH);
@@ -95,6 +116,28 @@ void writeByte(uint16_t address, uint8_t value)
     digitalWriteFast(PIN_RAS_N, HIGH);
 }
 
+uint8_t readNibble(uint16_t address)
+{
+    setAddress((address >> 6) & 0xFF);
+    digitalWriteFast(PIN_RAS_N, LOW);
+
+    uint8_t value = 0;
+    for (uint8_t ix = 0; ix < 4; ix++)
+    {
+        setAddress((address << 2) | ix);
+        digitalWriteFast(PIN_CAS_N, LOW);
+
+        delayMicroseconds(2);
+        value = value | ((digitalReadFast(PIN_DO) ? 1 : 0) << ix);
+
+        digitalWriteFast(PIN_CAS_N, HIGH);
+    }
+
+    digitalWriteFast(PIN_RAS_N, HIGH);
+
+    return value;
+}
+
 uint8_t readByte(uint16_t address)
 {
     setAddress((address >> 5) & 0xFF);
@@ -119,8 +162,8 @@ uint8_t readByte(uint16_t address)
 
 uint64_t readWord(uint8_t wordSize, uint16_t address)
 {
-    uint8_t bits=0;
-    uint8_t tmpWordSize=wordSize;
+    uint8_t bits = 0;
+    uint8_t tmpWordSize = wordSize;
     while (tmpWordSize = tmpWordSize >> 1)
     {
         bits++;

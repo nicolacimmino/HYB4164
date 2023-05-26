@@ -7,6 +7,7 @@ bool runTest()
     testWriteZeros();
     testWriteOnes();
     testWriteBitPattern();
+    testWriteNibblePattern();
     testWriteBytePattern();
     testWriteWord8Pattern();
     testWriteWord16Pattern();
@@ -25,6 +26,7 @@ bool runTest()
     Serial.println(F("-------- MEASURE - START --------"));
 
     measureWriteBitTime();
+    measureWriteNibbleTime();
     measureWriteByteTime();
     measureWriteWord8Time();
     measureWriteWord16Time();
@@ -32,6 +34,7 @@ bool runTest()
     measureWriteWord64Time();
 
     measureReadBitTime();
+    measureReadNibbleTime();
     measureReadByteTime();
     measureReadWord8Time();
     measureReadWord16Time();
@@ -81,6 +84,25 @@ void powerUpHYB4164()
     {
         writeByte(ix, ix);
     }
+}
+
+void testWriteNibblePattern()
+{
+    for (uint16_t ix = 0; ix < 16384; ix++)
+    {
+        writeByte(ix, ix & 0xF);
+    }
+
+    bool match = true;
+    for (uint16_t ix = 0; ix < 16384; ix++)
+    {
+        if (readByte(ix) != (ix & 0XF))
+        {
+            match = false;
+        }
+    }
+
+    reportResult(match, "Write Nibble Pattern");
 }
 
 void testWriteBytePattern()
@@ -235,6 +257,18 @@ void testWriteBitPattern()
     reportResult(match, "Write Bit Pattern");
 }
 
+void measureWriteNibbleTime()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        writeNibble(ix, 1);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
+
+    reportNumericResult(timeuS, "uS", "Write Nibble");
+}
+
 void measureWriteByteTime()
 {
     unsigned long startTime = millis();
@@ -317,6 +351,18 @@ void measureReadBitTime()
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
     reportNumericResult(timeuS, "uS", "Read Bit");
+}
+
+void measureReadNibbleTime()
+{
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 1024; ix++)
+    {
+        readNibble(ix);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
+
+    reportNumericResult(timeuS, "uS", "Read Nibble");
 }
 
 void measureReadByteTime()
