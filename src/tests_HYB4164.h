@@ -30,10 +30,12 @@ void measureReadWord8Time();
 void measureReadWord16Time();
 void measureReadWord32Time();
 void measureReadWord64Time();
+void measureReadBlock256Time();
 void measureWriteWord8Time();
 void measureWriteWord16Time();
 void measureWriteWord32Time();
 void measureWriteWord64Time();
+void measureWriteBlock256Time();
 void countBadBits();
 
 #endif

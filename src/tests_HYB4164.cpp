@@ -35,6 +35,7 @@ bool runTest()
     measureWriteWord16Time();
     measureWriteWord32Time();
     measureWriteWord64Time();
+    measureWriteBlock256Time();
 
     measureReadBitTime();
     measureReadNibbleTime();
@@ -43,6 +44,7 @@ bool runTest()
     measureReadWord16Time();
     measureReadWord32Time();
     measureReadWord64Time();
+    measureReadBlock256Time();
 
     if (failures > 0)
     {
@@ -362,6 +364,32 @@ void measureWriteWord64Time()
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
     reportNumericResult(timeuS, "uS", "Write Word64");
+}
+
+void measureWriteBlock256Time()
+{
+    uint8_t buffer[32];
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        writeBlock(256, ix, buffer);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportNumericResult(timeuS, "uS", "Write Block256");
+}
+
+void measureReadBlock256Time()
+{
+    uint8_t buffer[32];
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        readBlock(256, ix, buffer);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportNumericResult(timeuS, "uS", "Read Block256");
 }
 
 void measureWriteBitTime()
