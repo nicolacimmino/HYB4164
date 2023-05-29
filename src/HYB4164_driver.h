@@ -29,6 +29,8 @@ void writeByte(uint16_t address, uint8_t value);
 void writeNibble(uint16_t address, uint8_t value);
 uint8_t readByte(uint16_t address);
 uint8_t readNibble(uint16_t address);
+void readBlock(uint16_t blockSize, uint16_t address, uint8_t *value);
+void writeBlock(uint16_t blockSize, uint16_t address, uint8_t *value);
 
 void writeWord(uint8_t wordSize, uint16_t address, uint64_t value);
 uint64_t readWord(uint8_t wordSize, uint16_t address);

@@ -3,7 +3,7 @@
 bool runTest()
 {
     setupTestHarness();
-    
+
     Serial.println(F("\r\n--------- TESTS - START ---------"));
 
     testWriteZeros();
@@ -15,6 +15,7 @@ bool runTest()
     testWriteWord16Pattern();
     testWriteWord32Pattern();
     testWriteWord64Pattern();
+    testWriteBlockPattern();
 
     if (failures > 0)
     {
@@ -143,6 +144,38 @@ void testWriteWord8Pattern()
     }
 
     reportResult(match, "Write Word8 Pattern");
+}
+
+void testWriteBlockPattern()
+{
+    uint8_t blockContent[32];
+    for (uint8_t ix = 0; ix < 32; ix++)
+    {
+        blockContent[ix] = ix * 2;
+    }
+
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        writeBlock(256, ix, blockContent);
+    }
+
+    bool match = true;
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        memset(blockContent, 0, 32);
+
+        readBlock(256, ix, blockContent);
+
+        for (uint8_t iy = 0; iy < 32; iy++)
+        {
+            if (blockContent[iy] != (iy * 2))
+            {   
+                match = false;
+            }
+        }
+    }
+
+    reportResult(match, "Write Block Pattern");
 }
 
 void testWriteWord16Pattern()

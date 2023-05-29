@@ -17,6 +17,7 @@ void testWriteWord64Pattern();
 void testWriteNibblePattern();
 void testWriteBytePattern();
 void testWriteBitPattern();
+void testWriteBlockPattern();
 void testWriteZeros();
 void testWriteOnes();
 void measureWriteBitTime();

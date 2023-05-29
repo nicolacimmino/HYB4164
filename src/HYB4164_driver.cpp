@@ -188,3 +188,61 @@ uint64_t readWord(uint8_t wordSize, uint16_t address)
 
     return value;
 }
+
+void writeBlock(uint16_t blockSize, uint16_t address, uint8_t *value)
+{
+    uint8_t bits = 0;
+    uint16_t tmpBlockSize = blockSize;
+    while (tmpBlockSize = tmpBlockSize >> 1)
+    {
+        bits++;
+    }
+
+    setAddress((address >> (8 - bits)) & 0xFF);
+    digitalWriteFast(PIN_RAS_N, LOW);
+
+    for (uint16_t ix = 0; ix < blockSize; ix++)
+    {
+        digitalWriteFast(PIN_WE_N, LOW);
+
+        uint8_t bitValue = (value[ix >> 3] >> (ix & 0b111)) & 0b1;
+
+        digitalWriteFast(PIN_DI, bitValue);
+
+        setAddress((address << bits) | ix);
+        digitalWriteFast(PIN_CAS_N, LOW);
+
+        digitalWriteFast(PIN_WE_N, HIGH);
+        digitalWriteFast(PIN_CAS_N, HIGH);
+    }
+
+    digitalWriteFast(PIN_RAS_N, HIGH);
+}
+
+void readBlock(uint16_t blockSize, uint16_t address, uint8_t *value)
+{
+    uint8_t bits = 0;
+    uint16_t tmpBlockSize = blockSize;
+    while (tmpBlockSize = tmpBlockSize >> 1)
+    {
+        bits++;
+    }
+
+    memset(value, 0, (blockSize >> 3));
+
+    setAddress((address >> (8 - bits)) & 0xFF);
+    digitalWriteFast(PIN_RAS_N, LOW);
+
+    for (uint16_t ix = 0; ix < blockSize; ix++)
+    {
+        setAddress((address << bits) | ix);
+        digitalWriteFast(PIN_CAS_N, LOW);
+
+        delayMicroseconds(2);
+        value[ix >> 3] = value[ix >> 3] | ((digitalReadFast(PIN_DO) ? 1 : 0) << (ix & 0b111));
+
+        digitalWriteFast(PIN_CAS_N, HIGH);
+    }
+
+    digitalWriteFast(PIN_RAS_N, HIGH);
+}
