@@ -146,7 +146,7 @@ void testWriteWord8Pattern()
     bool match = true;
     for (uint16_t ix = 0; ix < 8192; ix++)
     {
-        if (readWord(8, ix) != (ix & 0XFF))
+        if (readWord<uint8_t>(ix) != (ix & 0XFF))
         {
             match = false;
         }
@@ -197,7 +197,7 @@ void testWriteWord16Pattern()
     bool match = true;
     for (uint16_t ix = 0; ix < 4096; ix++)
     {
-        if (readWord(16, ix) != (ix & 0XFFFF))
+        if (readWord<int16_t>(ix) != (ix & 0XFFFF))
         {
             match = false;
         }
@@ -216,7 +216,7 @@ void testWriteWord32Pattern()
     bool match = true;
     for (uint16_t ix = 0; ix < 2048; ix++)
     {
-        if (readWord(32, ix) != ix)
+        if (readWord<uint32_t>(ix) != ix)
         {
             match = false;
         }
@@ -235,7 +235,7 @@ void testWriteWord64Pattern()
     bool match = true;
     for (uint16_t ix = 0; ix < 1024; ix++)
     {
-        if (readWord(64, ix) != ix)
+        if (readWord<uint64_t>(ix) != ix)
         {
             match = false;
         }
@@ -530,7 +530,7 @@ void measureReadWord8Time()
     unsigned long startTime = millis();
     for (uint16_t ix = 0; ix < 1024; ix++)
     {
-        readWord(8, ix);
+        readWord<uint8_t>(ix);
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
@@ -542,7 +542,7 @@ void measureReadWord16Time()
     unsigned long startTime = millis();
     for (uint16_t ix = 0; ix < 1024; ix++)
     {
-        readWord(16, ix);
+        readWord<uint16_t>(ix);
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
@@ -554,7 +554,7 @@ void measureReadWord32Time()
     unsigned long startTime = millis();
     for (uint16_t ix = 0; ix < 256; ix++)
     {
-        readWord(32, ix);
+        readWord<uint32_t>(ix);
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
@@ -566,7 +566,7 @@ void measureReadWord64Time()
     unsigned long startTime = millis();
     for (uint16_t ix = 0; ix < 256; ix++)
     {
-        readWord(64, ix);
+        readWord<uint64_t>(ix);
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 

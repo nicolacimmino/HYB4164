@@ -26,7 +26,6 @@ void setAddress(uint8_t address);
 void writeBit(uint16_t address, bool value);
 bool readBit(uint16_t address);
 void writeNibble(uint16_t address, uint8_t value);
-uint8_t readByte(uint16_t address);
 uint8_t readNibble(uint16_t address);
 void readBlock(uint16_t blockSize, uint16_t address, uint8_t *value);
 void writeBlock(uint16_t blockSize, uint16_t address, uint8_t *value);
@@ -61,8 +60,39 @@ void writeWord(uint16_t address, T value)
     digitalWriteFast(PIN_RAS_N, HIGH);
 }
 
-constexpr void(*writeByte)(uint16_t address, uint8_t value) = &writeWord<uint8_t>;
+constexpr void (*writeByte)(uint16_t address, uint8_t value) = &writeWord<uint8_t>;
 
-uint64_t readWord(uint8_t wordSize, uint16_t address);
+template <typename T>
+T readWord(uint16_t address)
+{
+    uint8_t wordSize = sizeof(T) * 8;
+    uint8_t bits = 0;
+    while (wordSize = wordSize >> 1)
+    {
+        bits++;
+    }
+    wordSize = sizeof(T) * 8;
+
+    setAddress((address >> (8 - bits)) & 0xFF);
+    digitalWriteFast(PIN_RAS_N, LOW);
+
+    uint64_t value = 0;
+    for (uint8_t ix = 0; ix < wordSize; ix++)
+    {
+        setAddress((address << bits) | ix);
+        digitalWriteFast(PIN_CAS_N, LOW);
+
+        delayMicroseconds(2);
+        value = value | ((digitalReadFast(PIN_DO) ? 1 : 0) << ix);
+
+        digitalWriteFast(PIN_CAS_N, HIGH);
+    }
+
+    digitalWriteFast(PIN_RAS_N, HIGH);
+
+    return value;
+}
+
+constexpr uint8_t (*readByte)(uint16_t address) = &readWord<uint8_t>;
 
 #endif

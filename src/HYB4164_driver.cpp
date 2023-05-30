@@ -89,57 +89,6 @@ uint8_t readNibble(uint16_t address)
     return value;
 }
 
-uint8_t readByte(uint16_t address)
-{
-    setAddress((address >> 5) & 0xFF);
-    digitalWriteFast(PIN_RAS_N, LOW);
-
-    uint8_t value = 0;
-    for (uint8_t ix = 0; ix < 8; ix++)
-    {
-        setAddress((address << 3) | ix);
-        digitalWriteFast(PIN_CAS_N, LOW);
-
-        delayMicroseconds(2);
-        value = value | ((digitalReadFast(PIN_DO) ? 1 : 0) << ix);
-
-        digitalWriteFast(PIN_CAS_N, HIGH);
-    }
-
-    digitalWriteFast(PIN_RAS_N, HIGH);
-
-    return value;
-}
-
-uint64_t readWord(uint8_t wordSize, uint16_t address)
-{
-    uint8_t bits = 0;
-    uint8_t tmpWordSize = wordSize;
-    while (tmpWordSize = tmpWordSize >> 1)
-    {
-        bits++;
-    }
-
-    setAddress((address >> (8 - bits)) & 0xFF);
-    digitalWriteFast(PIN_RAS_N, LOW);
-
-    uint64_t value = 0;
-    for (uint8_t ix = 0; ix < wordSize; ix++)
-    {
-        setAddress((address << bits) | ix);
-        digitalWriteFast(PIN_CAS_N, LOW);
-
-        delayMicroseconds(2);
-        value = value | ((digitalReadFast(PIN_DO) ? 1 : 0) << ix);
-
-        digitalWriteFast(PIN_CAS_N, HIGH);
-    }
-
-    digitalWriteFast(PIN_RAS_N, HIGH);
-
-    return value;
-}
-
 void writeBlock(uint16_t blockSize, uint16_t address, uint8_t *value)
 {
     uint8_t bits = 0;
