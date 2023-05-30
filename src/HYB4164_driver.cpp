@@ -67,27 +67,6 @@ void writeNibble(uint16_t address, uint8_t value)
     digitalWriteFast(PIN_RAS_N, HIGH);
 }
 
-void writeByte(uint16_t address, uint8_t value)
-{
-    setAddress((address >> 5) & 0xFF);
-    digitalWriteFast(PIN_RAS_N, LOW);
-
-    for (uint8_t ix = 0; ix < 8; ix++)
-    {
-        digitalWriteFast(PIN_WE_N, LOW);
-
-        digitalWriteFast(PIN_DI, (value >> ix) & 0x1);
-
-        setAddress((address << 3) | ix);
-        digitalWriteFast(PIN_CAS_N, LOW);
-
-        digitalWriteFast(PIN_WE_N, HIGH);
-        digitalWriteFast(PIN_CAS_N, HIGH);
-    }
-
-    digitalWriteFast(PIN_RAS_N, HIGH);
-}
-
 uint8_t readNibble(uint16_t address)
 {
     setAddress((address >> 6) & 0xFF);
