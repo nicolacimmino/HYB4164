@@ -36,6 +36,9 @@ bool runTest()
     measureWriteWord16Time();
     measureWriteWord32Time();
     measureWriteWord64Time();
+    measureWriteBlock32Time();
+    measureWriteBlock64Time();
+    measureWriteBlock128Time();
     measureWriteBlock256Time();
 
     measureReadBitTime();
@@ -45,6 +48,9 @@ bool runTest()
     measureReadWord16Time();
     measureReadWord32Time();
     measureReadWord64Time();
+    measureReadBlock32Time();
+    measureReadBlock64Time();
+    measureReadBlock128Time();
     measureReadBlock256Time();
 
     if (failures > 0)
@@ -367,6 +373,45 @@ void measureWriteWord64Time()
     reportDoubleNumericResult(timeuS, timeuS / 64, "uS", "Write Word64");
 }
 
+void measureWriteBlock32Time()
+{
+    uint8_t buffer[4];
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        writeBlock(128, ix, buffer);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportDoubleNumericResult(timeuS, timeuS / 32, "uS", "Write Block32");
+}
+
+void measureWriteBlock64Time()
+{
+    uint8_t buffer[8];
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        writeBlock(128, ix, buffer);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportDoubleNumericResult(timeuS, timeuS / 64, "uS", "Write Block64");
+}
+
+void measureWriteBlock128Time()
+{
+    uint8_t buffer[16];
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        writeBlock(128, ix, buffer);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportDoubleNumericResult(timeuS, timeuS / 128, "uS", "Write Block128");
+}
+
 void measureWriteBlock256Time()
 {
     uint8_t buffer[32];
@@ -378,6 +423,45 @@ void measureWriteBlock256Time()
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
     reportDoubleNumericResult(timeuS, timeuS / 256, "uS", "Write Block256");
+}
+
+void measureReadBlock32Time()
+{
+    uint8_t buffer[4];
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        readBlock(64, ix, buffer);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportDoubleNumericResult(timeuS, timeuS / 32, "uS", "Read Block32");
+}
+
+void measureReadBlock64Time()
+{
+    uint8_t buffer[8];
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        readBlock(64, ix, buffer);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportDoubleNumericResult(timeuS, timeuS / 64, "uS", "Read Block64");
+}
+
+void measureReadBlock128Time()
+{
+    uint8_t buffer[16];
+    unsigned long startTime = millis();
+    for (uint16_t ix = 0; ix < 256; ix++)
+    {
+        readBlock(128, ix, buffer);
+    }
+    unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
+
+    reportDoubleNumericResult(timeuS, timeuS / 128, "uS", "Read Block128");
 }
 
 void measureReadBlock256Time()
