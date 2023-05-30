@@ -19,7 +19,7 @@ void writeBit(uint16_t address, bool value)
 
     digitalWriteFast(PIN_WE_N, LOW);
 
-    digitalWriteFast(PIN_DI, value);
+    digitalWriteFast(PIN_DI, value ? HIGH : LOW);
 
     setAddress(address & 0xFF);
     digitalWriteFast(PIN_CAS_N, LOW);
@@ -44,34 +44,6 @@ bool readBit(uint16_t address)
     digitalWriteFast(PIN_RAS_N, HIGH);
 
     return value;
-}
-
-void writeWord(uint8_t wordSize, uint16_t address, uint64_t value)
-{
-    uint8_t bits = 0; 
-    uint8_t tmpWordSize = wordSize;
-    while (tmpWordSize = tmpWordSize >> 1)
-    {
-        bits++;
-    }
-
-    setAddress((address >> (8 - bits)) & 0xFF);
-    digitalWriteFast(PIN_RAS_N, LOW);
-
-    for (uint8_t ix = 0; ix < wordSize; ix++)
-    {
-        digitalWriteFast(PIN_WE_N, LOW);
-
-        digitalWriteFast(PIN_DI, (value >> ix) & 0x1);
-
-        setAddress((address << bits) | ix);
-        digitalWriteFast(PIN_CAS_N, LOW);
-
-        digitalWriteFast(PIN_WE_N, HIGH);
-        digitalWriteFast(PIN_CAS_N, HIGH);
-    }
-
-    digitalWriteFast(PIN_RAS_N, HIGH);
 }
 
 void writeNibble(uint16_t address, uint8_t value)

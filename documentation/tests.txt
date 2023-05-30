@@ -25,3 +25,48 @@ Read Byte Time                 59uS
 Read Bit Time                  9uS
 -------------  END  -------------
 
+
+Write word template function so we pay the overhead of passing 32/64 bit args only where needed:
+
+-------- MEASURE - START --------
+                         T  T/bit
+Write Bit                9   9 uS
+Write Nibble            28   7 uS
+Write Byte              57   7 uS
+Write Word8             98  12 uS
+Write Word16           191  11 uS
+Write Word32           390  12 uS
+Write Word64           875  13 uS
+Write Block256        1917   7 uS
+Read Bit                 9   9 uS
+Read Nibble             26   6 uS
+Read Byte               59   7 uS
+Read Word8              72   9 uS
+Read Word16            150   9 uS
+Read Word32            363  11 uS
+Read Word64           1035  16 uS
+Read Block256         2031   7 uS
+-------------  END  -------------
+
+Infer word size from type so we pass one less arg on the callstack of WriteWord
+
+-------- MEASURE - START --------
+                         T  T/bit
+Write Bit               10  10 uS
+Write Nibble            29   7 uS
+Write Byte              58   7 uS
+Write Word8             57   7 uS
+Write Word16           125   7 uS
+Write Word32           390  12 uS
+Write Word64           871  13 uS
+Write Block256        1917   7 uS
+Read Bit                 9   9 uS
+Read Nibble             24   6 uS
+Read Byte               59   7 uS
+Read Word8              72   9 uS
+Read Word16            148   9 uS
+Read Word32            371  11 uS
+Read Word64           1035  16 uS
+Read Block256         2027   7 uS
+-------------  END  -------------
+

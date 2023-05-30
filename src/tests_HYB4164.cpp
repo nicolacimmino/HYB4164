@@ -134,7 +134,7 @@ void testWriteWord8Pattern()
 {
     for (uint16_t ix = 0; ix < 8192; ix++)
     {
-        writeWord(8, ix, ix & 0xFF);
+        writeWord<uint8_t>(ix, (uint8_t)(ix & 0xFF));
     }
 
     bool match = true;
@@ -185,7 +185,7 @@ void testWriteWord16Pattern()
 {
     for (uint16_t ix = 0; ix < 4096; ix++)
     {
-        writeWord(16, ix, ix & 0xFFFF);
+        writeWord<uint16_t>(ix, (uint16_t)(ix & 0xFFFF));
     }
 
     bool match = true;
@@ -204,7 +204,7 @@ void testWriteWord32Pattern()
 {
     for (uint16_t ix = 0; ix < 2048; ix++)
     {
-        writeWord(32, ix, ix);
+        writeWord<uint32_t>(ix, (uint32_t)ix);
     }
 
     bool match = true;
@@ -223,7 +223,7 @@ void testWriteWord64Pattern()
 {
     for (uint16_t ix = 0; ix < 1024; ix++)
     {
-        writeWord(64, ix, ix);
+        writeWord<uint64_t>(ix, (uint64_t)ix);
     }
 
     bool match = true;
@@ -324,7 +324,7 @@ void measureWriteWord8Time()
     unsigned long startTime = millis();
     for (uint16_t ix = 0; ix < 1024; ix++)
     {
-        writeWord(8, ix, 1);
+        writeWord<uint8_t>(ix, (uint8_t)1);
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
@@ -336,7 +336,7 @@ void measureWriteWord16Time()
     unsigned long startTime = millis();
     for (uint16_t ix = 0; ix < 512; ix++)
     {
-        writeWord(16, ix, 1);
+        writeWord<uint16_t>(ix, (uint16_t)1);
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 512;
 
@@ -348,7 +348,7 @@ void measureWriteWord32Time()
     unsigned long startTime = millis();
     for (uint16_t ix = 0; ix < 256; ix++)
     {
-        writeWord(32, ix, 1);
+        writeWord<uint32_t>(ix, (uint32_t)1);
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
@@ -360,7 +360,7 @@ void measureWriteWord64Time()
     unsigned long startTime = millis();
     for (uint16_t ix = 0; ix < 256; ix++)
     {
-        writeWord(64, ix, 1);
+        writeWord<uint64_t>(ix, (uint64_t)1);
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
