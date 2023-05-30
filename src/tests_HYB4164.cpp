@@ -27,6 +27,7 @@ bool runTest()
     Serial.println("");
 
     Serial.println(F("-------- MEASURE - START --------"));
+    Serial.println(F("                         T  T/bit"));
 
     measureWriteBitTime();
     measureWriteNibbleTime();
@@ -171,7 +172,7 @@ void testWriteBlockPattern()
         for (uint8_t iy = 0; iy < 32; iy++)
         {
             if (blockContent[iy] != (iy * 2))
-            {   
+            {
                 match = false;
             }
         }
@@ -203,13 +204,13 @@ void testWriteWord32Pattern()
 {
     for (uint16_t ix = 0; ix < 2048; ix++)
     {
-        writeWord(16, ix, ix);
+        writeWord(32, ix, ix);
     }
 
     bool match = true;
     for (uint16_t ix = 0; ix < 2048; ix++)
     {
-        if (readWord(16, ix) != ix)
+        if (readWord(32, ix) != ix)
         {
             match = false;
         }
@@ -303,7 +304,7 @@ void measureWriteNibbleTime()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Write Nibble");
+    reportDoubleNumericResult(timeuS, timeuS / 4, "uS", "Write Nibble");
 }
 
 void measureWriteByteTime()
@@ -315,7 +316,7 @@ void measureWriteByteTime()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Write Byte");
+    reportDoubleNumericResult(timeuS, timeuS / 8, "uS", "Write Byte");
 }
 
 void measureWriteWord8Time()
@@ -327,7 +328,7 @@ void measureWriteWord8Time()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Write Word8");
+    reportDoubleNumericResult(timeuS, timeuS / 8, "uS", "Write Word8");
 }
 
 void measureWriteWord16Time()
@@ -339,7 +340,7 @@ void measureWriteWord16Time()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 512;
 
-    reportNumericResult(timeuS, "uS", "Write Word16");
+    reportDoubleNumericResult(timeuS, timeuS / 16, "uS", "Write Word16");
 }
 
 void measureWriteWord32Time()
@@ -351,7 +352,7 @@ void measureWriteWord32Time()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
-    reportNumericResult(timeuS, "uS", "Write Word32");
+    reportDoubleNumericResult(timeuS, timeuS / 32, "uS", "Write Word32");
 }
 
 void measureWriteWord64Time()
@@ -363,7 +364,7 @@ void measureWriteWord64Time()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
-    reportNumericResult(timeuS, "uS", "Write Word64");
+    reportDoubleNumericResult(timeuS, timeuS / 64, "uS", "Write Word64");
 }
 
 void measureWriteBlock256Time()
@@ -376,7 +377,7 @@ void measureWriteBlock256Time()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
-    reportNumericResult(timeuS, "uS", "Write Block256");
+    reportDoubleNumericResult(timeuS, timeuS / 256, "uS", "Write Block256");
 }
 
 void measureReadBlock256Time()
@@ -389,7 +390,7 @@ void measureReadBlock256Time()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
-    reportNumericResult(timeuS, "uS", "Read Block256");
+    reportDoubleNumericResult(timeuS, timeuS / 256, "uS", "Read Block256");
 }
 
 void measureWriteBitTime()
@@ -401,7 +402,7 @@ void measureWriteBitTime()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Write Bit");
+    reportDoubleNumericResult(timeuS, timeuS, "uS", "Write Bit");
 }
 
 void measureReadBitTime()
@@ -413,7 +414,7 @@ void measureReadBitTime()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Read Bit");
+    reportDoubleNumericResult(timeuS, timeuS, "uS", "Read Bit");
 }
 
 void measureReadNibbleTime()
@@ -425,7 +426,7 @@ void measureReadNibbleTime()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Read Nibble");
+    reportDoubleNumericResult(timeuS, timeuS / 4, "uS", "Read Nibble");
 }
 
 void measureReadByteTime()
@@ -437,7 +438,7 @@ void measureReadByteTime()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Read Byte");
+    reportDoubleNumericResult(timeuS, timeuS / 8, "uS", "Read Byte");
 }
 
 void measureReadWord8Time()
@@ -449,7 +450,7 @@ void measureReadWord8Time()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Read Word8");
+    reportDoubleNumericResult(timeuS, timeuS / 8, "uS", "Read Word8");
 }
 
 void measureReadWord16Time()
@@ -461,7 +462,7 @@ void measureReadWord16Time()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 1024;
 
-    reportNumericResult(timeuS, "uS", "Read Word16");
+    reportDoubleNumericResult(timeuS, timeuS / 16, "uS", "Read Word16");
 }
 
 void measureReadWord32Time()
@@ -473,7 +474,7 @@ void measureReadWord32Time()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
-    reportNumericResult(timeuS, "uS", "Read Word32");
+    reportDoubleNumericResult(timeuS, timeuS / 32, "uS", "Read Word32");
 }
 
 void measureReadWord64Time()
@@ -485,7 +486,7 @@ void measureReadWord64Time()
     }
     unsigned long timeuS = (1000 * (millis() - startTime)) / 256;
 
-    reportNumericResult(timeuS, "uS", "Read Word64");
+    reportDoubleNumericResult(timeuS, timeuS / 64, "uS", "Read Word64");
 }
 
 void countBadBits()

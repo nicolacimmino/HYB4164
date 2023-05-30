@@ -53,5 +53,6 @@ byte readLine(byte line);
 void expect(byte line, byte value, const char *message);
 void reportResult(bool result, const char *message);
 void reportNumericResult(uint32_t result, const char *unit, const char *message);
+void reportDoubleNumericResult(uint32_t resultA, uint32_t resultB, const char *unit, const char *message);
 
 #endif

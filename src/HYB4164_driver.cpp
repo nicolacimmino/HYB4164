@@ -48,7 +48,7 @@ bool readBit(uint16_t address)
 
 void writeWord(uint8_t wordSize, uint16_t address, uint64_t value)
 {
-    uint8_t bits = 0;
+    uint8_t bits = 0; 
     uint8_t tmpWordSize = wordSize;
     while (tmpWordSize = tmpWordSize >> 1)
     {
