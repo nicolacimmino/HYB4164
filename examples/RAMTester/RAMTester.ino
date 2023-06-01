@@ -16,12 +16,12 @@
 //
 //
 
-#include "src/test_harness.h"
-#include "src/monitor.h"
+#include "test_harness.h"
+#include "monitor.h"
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.dram4164_begin(9600);
 
   setupTestHarness();
   powerUpHYB4164();

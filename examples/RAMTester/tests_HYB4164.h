@@ -4,7 +4,7 @@
 
 #include <Arduino.h>
 #include "test_harness.h"
-#include "HYB4164_driver.h"
+#include <4164Driver.h>
 
 bool runTest();
 
