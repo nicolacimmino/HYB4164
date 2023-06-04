@@ -30,12 +30,15 @@ extern char printBuffer[PRINT_BUFFER_SIZE];
 
 uint8_t processCommand();
 void enterMonitor();
-void dumpMemory(int start, int end);
+void dumpMemory(int start);
 void writeMemory(int address);
 void printSingleMemoryLocation(int address, bool printNewLine = false);
 //void test(int loop);
 void printMessage(uint8_t messageId);
 
 const char commands[] = "MHWT";
+
+void serialPrintf(const char *format, ...);
+char waitForKeyPress();
 
 #endif

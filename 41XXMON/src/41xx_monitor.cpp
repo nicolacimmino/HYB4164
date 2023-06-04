@@ -76,7 +76,7 @@ uint8_t processCommand()
   switch (command)
   {
   case CMD_MEMORY:
-    dumpMemory(p0, p1);
+    dumpMemory(p0);
     break;
   case CMD_HELP:
     printMessage(MESSAGE_HELP_IX);
@@ -121,8 +121,7 @@ void writeMemory(int address)
   printSingleMemoryLocation(address);
 
   while (true)
-  {
-
+  {    
     while (Serial.available())
     {
       rxBuffer[rxBufferIx] = toupper(Serial.read());
@@ -173,48 +172,60 @@ void writeMemory(int address)
   }
 }
 
-void dumpMemory(int start, int end)
+void dumpMemory(int start)
 {
-  for (int address = start - (start % MON_DUMP_PER_LINE); address < end + 1; address++)
+  for (int address = start - (start % MON_DUMP_PER_LINE); address < EXT_MEM_SIZE; address++)
   {
     if (address % MON_DUMP_PER_LINE == 0)
     {
-      sprintf(printBuffer, "%04X  ", address);
-      Serial.print(printBuffer);
+      serialPrintf("%04X  ", address);
     }
 
     if (address < start)
     {
-      Serial.print("   ");
+      serialPrintf("   ");
       continue;
     }
 
-    sprintf(printBuffer,
-            "%02X%s",
-            dram4164::readByte(address),
-            ((address % MON_DUMP_PER_LINE) != (MON_DUMP_PER_LINE - 1)) ? "." : "\r\n");
-    Serial.print(printBuffer);
-  }
+    serialPrintf("%02X%s", dram4164::readByte(address), (((address + 1) % MON_DUMP_PER_LINE) == 0) ? "\r\n" : ".");
 
-  if (end % MON_DUMP_PER_LINE != (MON_DUMP_PER_LINE - 1))
-  {
-    Serial.println("");
+    if (((address + 1) % MON_DUMP_PER_LINE == 0) && (waitForKeyPress() == 'X'))
+    {
+      return;
+    }
   }
 }
 
 void printSingleMemoryLocation(int address, bool printNewLine = false)
 {
-  sprintf(printBuffer, "%04X  %02X .", address, dram4164::readByte(address));
-  Serial.print(printBuffer);
-
-  if (printNewLine)
-  {
-    Serial.println(F(""));
-  }
+  serialPrintf("%04X  %02X .%s", 
+          address, 
+          dram4164::readByte(address),
+          printNewLine ? "\r\n" : "");
 }
 
 void printMessage(uint8_t messageId)
 {
   strcpy_P(printBuffer, (char *)pgm_read_word(&(messages[messageId])));
   Serial.print(printBuffer);
+}
+
+void serialPrintf(const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+
+  vsprintf(printBuffer, format, args);
+
+  va_end(args);
+
+  Serial.print(printBuffer);
+}
+
+char waitForKeyPress()
+{
+  while (!Serial.available())
+    ;
+
+  return toupper(Serial.read());
 }
