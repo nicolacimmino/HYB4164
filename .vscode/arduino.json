@@ -2,5 +2,5 @@
     "configuration": "cpu=atmega328old",
     "board": "arduino:avr:nano",
     "port": "COM7",
-    "sketch": "examples\\SimpleReadWrite\\SimpleReadWrite.ino"
+    "sketch": "41XXMON\\41XXMON.ino"
 }

@@ -1,32 +1,19 @@
-#include "monitor.h"
+#include "41xx_monitor.h"
 
 char printBuffer[PRINT_BUFFER_SIZE];
 byte rxBuffer[RX_BUFFER_SIZE];
-
-byte programMemoryShadow[PROGRAM_MEMOMORY_SIZE];
-
-/**********************************************************************
- * Enter the interactive monitor.  
- */
 
 void enterMonitor()
 {
   uint8_t ix = 0;
 
+  dram4164::begin();
+  Serial.begin(9600);
+
   printMessage(MESSAGE_MONITOR_BANNER_IX);
 
   while (true)
   {
-    if (failures == 0 && isButtonPressed())
-    {
-      test(0);
-
-      if (!isButtonPressed())
-      {
-        Serial.print(F("\r\n" MONITOR_PROMPT));
-      }
-    }
-
     while (Serial.available())
     {
       rxBuffer[ix] = toupper(Serial.read());
@@ -57,17 +44,6 @@ void enterMonitor()
   }
 }
 
-/*
- **********************************************************************/
-
-/**********************************************************************
- * Process the user command.
- * 
- * Returns:
- *  RES_OK              Command processed successfully.
- *  RES_ERR             Error while processing command.
- */
-
 uint8_t processCommand()
 {
   char *token = strtok(rxBuffer, " ");
@@ -83,7 +59,7 @@ uint8_t processCommand()
   }
 
   int p0 = 0;
-  int p1 = PROGRAM_MEMOMORY_SIZE - 1;
+  int p1 = EXT_MEM_SIZE - 1;
 
   token = strtok(NULL, " ");
   if (token != NULL)
@@ -108,9 +84,9 @@ uint8_t processCommand()
   case CMD_WRITE:
     writeMemory(p0);
     break;
-  case CMD_TEST:
-    test(p0);
-    break;
+  // case CMD_TEST:
+  //   test(p0);
+  //   break;
   default:
     Serial.println(F("UNKNOWN COMMAND."));
     return RES_ERR;
@@ -119,39 +95,23 @@ uint8_t processCommand()
   return RES_OK;
 }
 
-/*
- **********************************************************************/
-
-/**********************************************************************
- * Run Tests.
- * 
- */
-
 void test(int loop)
 {
-  while (true)
-  {
-    bool result = runTest();
+  // while (true)
+  // {
+  //   bool result = runTest();
 
-    digitalWrite(PIN_LED_GREEN, result);
-    digitalWrite(PIN_LED_RED, !result);
+  //   digitalWrite(PIN_LED_GREEN, result);
+  //   digitalWrite(PIN_LED_RED, !result);
 
-    delay(2000);
+  //   delay(2000);
 
-    if (!result || loop == 0)
-    {
-      return;
-    }
-  }
+  //   if (!result || loop == 0)
+  //   {
+  //     return;
+  //   }
+  // }
 }
-
-/*
- **********************************************************************/
-
-/**********************************************************************
- * Write to the memory.
- * 
- */
 
 void writeMemory(int address)
 {
@@ -193,12 +153,12 @@ void writeMemory(int address)
 
         if (rxBufferIx > 0)
         {
-          writeByte(address, strtoul(token, NULL, 16));
+          dram4164::writeByte(address, strtoul(token, NULL, 16));
         }
 
         rxBufferIx = 0;
 
-        address = (address + 1) % PROGRAM_MEMOMORY_SIZE;
+        address = (address + 1) % EXT_MEM_SIZE;
 
         printSingleMemoryLocation(address);
 
@@ -212,14 +172,6 @@ void writeMemory(int address)
     }
   }
 }
-
-/*
- **********************************************************************/
-
-/**********************************************************************
- * Dump memory, MON_DUMP_PER_LINE bytes per line.
- * 
- */
 
 void dumpMemory(int start, int end)
 {
@@ -239,7 +191,7 @@ void dumpMemory(int start, int end)
 
     sprintf(printBuffer,
             "%02X%s",
-            readByte(address),
+            dram4164::readByte(address),
             ((address % MON_DUMP_PER_LINE) != (MON_DUMP_PER_LINE - 1)) ? "." : "\r\n");
     Serial.print(printBuffer);
   }
@@ -250,17 +202,9 @@ void dumpMemory(int start, int end)
   }
 }
 
-/*
- **********************************************************************/
-
-/**********************************************************************
- * Helper to print a single memory location formatted.
- * 
- */
-
 void printSingleMemoryLocation(int address, bool printNewLine = false)
 {
-  sprintf(printBuffer, "%04X  %02X .", address, readByte(address));
+  sprintf(printBuffer, "%04X  %02X .", address, dram4164::readByte(address));
   Serial.print(printBuffer);
 
   if (printNewLine)
@@ -269,5 +213,8 @@ void printSingleMemoryLocation(int address, bool printNewLine = false)
   }
 }
 
-/*
- **********************************************************************/
+void printMessage(uint8_t messageId)
+{
+  strcpy_P(printBuffer, (char *)pgm_read_word(&(messages[messageId])));
+  Serial.print(printBuffer);
+}
