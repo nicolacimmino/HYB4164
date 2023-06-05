@@ -30,7 +30,7 @@ extern byte rxBuffer[];
 extern char printBuffer[PRINT_BUFFER_SIZE];
 
 int getIntParam(int defaultValue);
-char* getCharParam();
+char *getCharParam();
 
 uint8_t processCommand();
 void enterMonitor();
@@ -38,13 +38,26 @@ void dumpMemory();
 void writeMemory();
 void switchMemoryLayout();
 
-void printSingleMemoryLocation(int address, bool printNewLine = false);
 void printMessage(uint8_t messageId);
 
 const char commands[] = "MHWTL";
 
 void serialPrintf(const char *format, ...);
 char waitForKeyPress();
+
+void printValue(int address, bool prefixWithAddress = false, bool printTailChar = false);
+void storeValue(int address, uint64_t value);
+
+template <typename T>
+void printValueHelper(uint16_t address)
+{
+    T val = dram4164::readWord<T>(address);
+
+    for (int8_t ix = sizeof(T) - 1; ix >= 0; ix--)
+    {
+        serialPrintf("%02X", (uint8_t)(val >> (ix * 8) & 0xFF));
+    }
+}
 
 #define MEM_LAYOUT_BIT 1
 #define MEM_LAYOUT_NIBBLE 4

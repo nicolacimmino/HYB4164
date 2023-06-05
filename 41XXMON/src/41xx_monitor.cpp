@@ -130,13 +130,15 @@ void switchMemoryLayout()
     serialPrintf("Unknown layout: %s", arg);
   }
 }
+
 void writeMemory()
 {
   byte rxBufferIx = 0;
   char *token;
   int address = getIntParam(0);
 
-  printSingleMemoryLocation(address);
+  printValue(address, true);
+  Serial.print(".");
 
   while (true)
   {
@@ -170,14 +172,15 @@ void writeMemory()
 
         if (rxBufferIx > 0)
         {
-          dram4164::writeByte(address, strtoul(token, NULL, 16));
+          storeValue(address, strtoul(token, NULL, 16));
         }
 
         rxBufferIx = 0;
 
         address = (address + 1) % EXT_MEM_SIZE;
 
-        printSingleMemoryLocation(address);
+        printValue(address, true);
+        Serial.print(".");
 
         continue;
       }
@@ -192,76 +195,11 @@ void writeMemory()
 
 void dumpMemory()
 {
-  uint16_t val16;
-  uint32_t val32;
-  uint64_t val64;
-
   int start = getIntParam(0);
 
   for (int address = start - (start % MON_DUMP_PER_LINE); address < EXT_MEM_SIZE; address++)
   {
-    if (address % MON_DUMP_PER_LINE == 0)
-    {
-      serialPrintf("%04X  ", address);
-    }
-
-    if (address < start)
-    {
-      serialPrintf("   ");
-      continue;
-    }
-
-    switch (memoryLayout)
-    {
-    case MEM_LAYOUT_BYTE:
-      serialPrintf("%02X%s", dram4164::readByte(address), (((address + 1) % MON_DUMP_PER_LINE) == 0) ? "\r\n" : ".");
-      break;
-    case MEM_LAYOUT_BIT:
-      serialPrintf("%s%s", dram4164::readBit(address) ? "1" : "0", (((address + 1) % MON_DUMP_PER_LINE) == 0) ? "\r\n" : ".");
-      break;
-    case MEM_LAYOUT_NIBBLE:
-      serialPrintf("%01X%s", dram4164::readNibble(address), (((address + 1) % MON_DUMP_PER_LINE) == 0) ? "\r\n" : ".");
-      break;
-    case MEM_LAYOUT_WORD16:
-      val16 = dram4164::readWord<uint16_t>(address);
-      serialPrintf("%02X%02X%s",
-                   (val16 >> 8), val16 & 0xFF,
-                   (((address + 1) % MON_DUMP_PER_LINE) == 0) ? "\r\n" : ".");
-      break;
-    case MEM_LAYOUT_WORD32:
-      val32 = dram4164::readWord<uint32_t>(address);
-
-      serialPrintf("%02X%02X",
-                   (uint8_t)(val32 >> 24 & 0xFF),
-                   (uint8_t)(val32 >> 16 & 0xFF));
-      serialPrintf("%02X%02X%s",
-                   (uint8_t)(val32 >> 8 & 0xFF),
-                   (uint8_t)(val32 & 0xFF),
-                   (((address + 1) % MON_DUMP_PER_LINE) == 0) ? "\r\n" : ".");
-      break;
-
-    case MEM_LAYOUT_WORD64:
-      val64 = dram4164::readWord<uint64_t>(address);
-
-      serialPrintf("%02X%02X",
-                   (uint8_t)(val64 >> 56 & 0xFF),
-                   (uint8_t)(val64 >> 48 & 0xFF));
-      serialPrintf("%02X%02X",
-                   (uint8_t)(val64 >> 40 & 0xFF),
-                   (uint8_t)(val64 >> 32 & 0xFF));
-      serialPrintf("%02X%02X",
-                   (uint8_t)(val64 >> 24 & 0xFF),
-                   (uint8_t)(val64 >> 16 & 0xFF));
-      serialPrintf("%02X%02X%s",
-                   (uint8_t)(val64 >> 8 & 0xFF),
-                   (uint8_t)(val64 & 0xFF),
-                   (((address + 1) % MON_DUMP_PER_LINE) == 0) ? "\r\n" : ".");
-
-      break;
-    default:
-      Serial.println("Unknwn layout");
-      Serial.println(memoryLayout);
-    }
+    printValue(address, (address % MON_DUMP_PER_LINE == 0), true);
 
     if (((address + 1) % MON_DUMP_PER_LINE == 0) && (waitForKeyPress() == 'X'))
     {
@@ -270,12 +208,72 @@ void dumpMemory()
   }
 }
 
-void printSingleMemoryLocation(int address, bool printNewLine = false)
+void storeValue(int address, uint64_t value)
 {
-  serialPrintf("%04X  %02X .%s",
-               address,
-               dram4164::readByte(address),
-               printNewLine ? "\r\n" : "");
+  switch (memoryLayout)
+  {
+  case MEM_LAYOUT_BIT:
+    dram4164::writeBit(address, value & 0b1);
+    break;
+  case MEM_LAYOUT_NIBBLE:
+    dram4164::writeNibble(address, value & 0b1111);
+    break;
+  case MEM_LAYOUT_BYTE:
+    dram4164::writeByte(address, value & 0xFF);
+    break;
+  case MEM_LAYOUT_WORD16:
+    dram4164::writeWord<uint16_t>(address, value & 0xFFFF);
+    break;
+  case MEM_LAYOUT_WORD32:
+    dram4164::writeWord<uint32_t>(address, value & 0xFFFFFFFF);
+    break;
+  case MEM_LAYOUT_WORD64:
+    dram4164::writeWord<uint64_t>(address, value);
+    break;
+  default:
+    Serial.print("UNKNOWN MEMORY LAYOUT: ");
+    Serial.println(memoryLayout);
+    return;
+  }
+}
+
+void printValue(int address, bool prefixWithAddress, bool printTailChar)
+{
+  if (prefixWithAddress)
+  {
+    serialPrintf("%04X:", address);
+  }
+
+  switch (memoryLayout)
+  {
+  case MEM_LAYOUT_BIT:
+    serialPrintf("%s", dram4164::readBit(address) ? "1" : "0");
+    break;
+  case MEM_LAYOUT_NIBBLE:
+    serialPrintf("%01X", dram4164::readNibble(address));
+    break;
+  case MEM_LAYOUT_BYTE:
+    printValueHelper<uint8_t>(address);
+    break;
+  case MEM_LAYOUT_WORD16:
+    printValueHelper<uint16_t>(address);
+    break;
+  case MEM_LAYOUT_WORD32:
+    printValueHelper<uint32_t>(address);
+    break;
+  case MEM_LAYOUT_WORD64:
+    printValueHelper<uint64_t>(address);
+    break;
+  default:
+    Serial.print("UNKNOWN MEMORY LAYOUT: ");
+    Serial.println(memoryLayout);
+    return;
+  }
+
+  if (printTailChar)
+  {
+    Serial.print(((address + 1) % MON_DUMP_PER_LINE) == 0 ? "\r\n" : ".");
+  }
 }
 
 void printMessage(uint8_t messageId)
