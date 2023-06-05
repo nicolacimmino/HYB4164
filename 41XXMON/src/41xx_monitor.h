@@ -5,7 +5,7 @@
 #include <DRAM4164Driver.h>
 #include "messages.h"
 
-#define PRINT_BUFFER_SIZE 256
+#define PRINT_BUFFER_SIZE 128
 #define RX_BUFFER_SIZE 32
 #define EXT_MEM_SIZE 8152
 
