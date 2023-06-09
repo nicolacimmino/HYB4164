@@ -22,7 +22,13 @@
 #define PIN_CAS_N A2
 #define PIN_GND A3
 
-namespace dram4164 {
+namespace dram4164
+{
+#define BIG_ENDIAN 1
+#define LITTLE_ENDIAN 2
+
+    extern uint8_t endianess;
+
     void setAddress(uint8_t address);
 
     void begin();
@@ -30,8 +36,8 @@ namespace dram4164 {
     bool readBit(uint16_t address);
     void writeNibble(uint16_t address, uint8_t value);
     uint8_t readNibble(uint16_t address);
-    void readBlock(uint16_t blockSize, uint16_t address, uint8_t * value);
-    void writeBlock(uint16_t blockSize, uint16_t address, uint8_t * value);
+    void readBlock(uint16_t blockSize, uint16_t address, uint8_t *value);
+    void writeBlock(uint16_t blockSize, uint16_t address, uint8_t *value);
 
     template <typename T>
     void writeWord(uint16_t address, T value)
@@ -51,7 +57,14 @@ namespace dram4164 {
         {
             digitalWriteFast(PIN_WE_N, LOW);
 
-            digitalWriteFast(PIN_DI, (value >> ix) & 0x1);
+            if (endianess == LITTLE_ENDIAN)
+            {
+                digitalWriteFast(PIN_DI, (value >> ix) & 0x1);
+            }
+            else
+            {
+                digitalWriteFast(PIN_DI, (value >> (wordSize - ix - 1)) & 0x1);
+            }
 
             setAddress((address << bits) | ix);
             digitalWriteFast(PIN_CAS_N, LOW);
@@ -86,7 +99,14 @@ namespace dram4164 {
             digitalWriteFast(PIN_CAS_N, LOW);
 
             delayMicroseconds(2);
-            value = value | ((digitalReadFast(PIN_DO) ? 1 : 0) << ix);
+            if (endianess == LITTLE_ENDIAN)
+            {
+                value = value | ((digitalReadFast(PIN_DO) ? 1 : 0) << ix);
+            }
+            else
+            {
+                value = value | ((digitalReadFast(PIN_DO) ? 1 : 0) << (wordSize - ix - 1));
+            }
 
             digitalWriteFast(PIN_CAS_N, HIGH);
         }

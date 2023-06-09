@@ -127,7 +127,25 @@ void switchMemoryLayout()
   }
   else
   {
-    serialPrintf("Unknown layout: %s", arg);
+    serialPrintf("UNKNOWN LAYOUT: %s", arg);
+  }
+
+  arg = getCharParam();
+
+  if (arg != NULL)
+  {
+    if (strcmp(arg, "BIG"))
+    {
+      dram4164::endianess == BIG_ENDIAN;
+    }
+    else if (strcmp(arg, "LITTLE"))
+    {
+      dram4164::endianess == LITTLE_ENDIAN;
+    }
+    else
+    {
+      serialPrintf("UNKNOWN ENDIANESS: %s", arg);
+    }
   }
 }
 

@@ -2,6 +2,8 @@
 
 namespace dram4164
 {
+    uint8_t endianess = BIG_ENDIAN;
+
     void begin()
     {
         pinMode(PIN_VCC, OUTPUT);
